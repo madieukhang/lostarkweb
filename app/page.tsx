@@ -1,4 +1,5 @@
-// Placeholder until the shell lands; every UI string goes through the i18n layer.
+import { Shell } from "@/components/Shell";
+
 export default function HomePage() {
-  return <main />;
+  return <Shell />;
 }

@@ -15,6 +15,9 @@ import { signSession, verifySession, type Tabs } from "./session";
 
 const SESSION_COOKIE = "__Host-session";
 const STATE_COOKIE = "__Host-oauth_state";
+/** Page to come back to after the login, such as the page whose read hit an expired session. */
+const NEXT_COOKIE = "__Host-oauth_next";
+const PATH_BASE = "https://web.invalid";
 const SESSION_TTL_SEC = 24 * 60 * 60;
 const STATE_TTL_SEC = 10 * 60;
 const LANG_TTL_SEC = 365 * 24 * 60 * 60;
@@ -22,6 +25,30 @@ const LANG_TTL_SEC = 365 * 24 * 60 * 60;
 const SILENT_SUFFIX = ".s";
 /** Failures of Discord or of a bot API: the user may simply try again. */
 const UPSTREAM_ERRORS = new Set(["DiscordUnavailable", "BotGuildsUnavailable"]);
+
+/**
+ * Accepts only a path on this site outside /auth/*, so the return path can never become an
+ * open redirect ("//host", "/\host" and absolute URLs resolve to another origin) or a login loop.
+ */
+function safeNextPath(raw: string | null): string | null {
+  if (!raw?.startsWith("/")) return null;
+  let url: URL;
+  try {
+    url = new URL(raw, PATH_BASE);
+  } catch {
+    return null;
+  }
+  if (url.origin !== PATH_BASE || url.pathname.startsWith("/auth/")) return null;
+  return `${url.pathname}${url.search}`;
+}
+
+function readNextCookie(request: Request): string | null {
+  try {
+    return safeNextPath(decodeURIComponent(readCookie(request, NEXT_COOKIE) ?? ""));
+  } catch {
+    return null;
+  }
+}
 
 function randomState(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(32));
@@ -31,12 +58,16 @@ function randomState(): string {
 }
 
 /**
- * @param request GET /auth/login, with ?silent=1 to skip Discord's consent screen.
+ * @param request GET /auth/login, with ?silent=1 to skip Discord's consent screen and
+ *   ?next=<path> for the page to return to.
  * @param env Worker env.
- * @returns Redirect to Discord's authorize page, setting the state cookie.
+ * @returns Redirect to Discord's authorize page, setting the state cookie and the return path
+ *   (or clearing a stale one).
  */
 export async function handleLogin(request: Request, env: Env): Promise<Response> {
-  const silent = new URL(request.url).searchParams.get("silent") === "1";
+  const params = new URL(request.url).searchParams;
+  const silent = params.get("silent") === "1";
+  const next = safeNextPath(params.get("next"));
   const state = randomState();
   const target = new URL("https://discord.com/oauth2/authorize");
   target.search = new URLSearchParams({
@@ -48,7 +79,12 @@ export async function handleLogin(request: Request, env: Env): Promise<Response>
     ...(silent ? { prompt: "none" } : {}),
   }).toString();
   const cookieValue = silent ? `${state}${SILENT_SUFFIX}` : state;
-  return redirect(target.toString(), [buildCookie(STATE_COOKIE, cookieValue, { maxAge: STATE_TTL_SEC, httpOnly: true })]);
+  return redirect(target.toString(), [
+    buildCookie(STATE_COOKIE, cookieValue, { maxAge: STATE_TTL_SEC, httpOnly: true }),
+    next
+      ? buildCookie(NEXT_COOKIE, encodeURIComponent(next), { maxAge: STATE_TTL_SEC, httpOnly: true })
+      : clearCookie(NEXT_COOKIE, true),
+  ]);
 }
 
 /**
@@ -68,7 +104,8 @@ export async function handleCallback(
   const stateCookie = readCookie(request, STATE_COOKIE) ?? "";
   const silent = stateCookie.endsWith(SILENT_SUFFIX);
   const expectedState = silent ? stateCookie.slice(0, -SILENT_SUFFIX.length) : stateCookie;
-  const cookies = [clearCookie(STATE_COOKIE, true)];
+  const next = readNextCookie(request);
+  const cookies = [clearCookie(STATE_COOKIE, true), clearCookie(NEXT_COOKIE, true)];
 
   // A refused silent login lands on the plain login page, so it cannot loop back into itself.
   if (params.has("error")) return redirect(silent ? "/login" : "/login?error=discordDenied", cookies);
@@ -112,7 +149,7 @@ export async function handleCallback(
   if (!parseLang(readCookie(request, "lang"))) {
     cookies.push(buildCookie("lang", langFromLocale(user.locale), { maxAge: LANG_TTL_SEC, httpOnly: false }));
   }
-  return redirect("/", cookies);
+  return redirect(next ?? "/", cookies);
 }
 
 /**

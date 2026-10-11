@@ -1,0 +1,43 @@
+{
+  "lang": {
+    "label": "Change language",
+    "switchTo": "Tiếng Việt"
+  },
+  "common": {
+    "loading": "Loading"
+  },
+  "home": {
+    "title": "LostArk Tool",
+    "signIn": "Log in with Discord",
+    "signOut": "Log out",
+    "signedInAs": "Signed in as {name}",
+    "noTabs": "This account shares no server with the bots.",
+    "tabs": {
+      "checklist": "Checklist"
+    }
+  },
+  "login": {
+    "title": "Log in",
+    "intro": "Log in with your Discord account. This site is for members of a Discord server that has the bot.",
+    "button": "Log in with Discord",
+    "errorCode": "Error code: {code}",
+    "error": {
+      "stateMismatch": "That login link has expired or was already used. Please log in again.",
+      "noSharedGuild": "This site is only for members of a Discord server that has the bot.",
+      "discordUnavailable": "Discord did not answer. Please try again in a few seconds.",
+      "discordDenied": "The Discord login was cancelled."
+    }
+  },
+  "checklist": {
+    "title": "Checklist",
+    "hello": "Hello {name}"
+  },
+  "errors": {
+    "noSession": "Your session has ended. Please log in again.",
+    "noTabAccess": "This account no longer shares a server with this bot.",
+    "badOrigin": "The request was refused because it did not come from this site.",
+    "notFound": "Not found.",
+    "apiUnavailable": "The service is not answering right now. Please try again soon.",
+    "unknown": "Something went wrong. Please try again."
+  }
+}

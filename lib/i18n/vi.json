@@ -1,0 +1,43 @@
+{
+  "lang": {
+    "label": "Đổi ngôn ngữ",
+    "switchTo": "English"
+  },
+  "common": {
+    "loading": "Đang tải"
+  },
+  "home": {
+    "title": "LostArk Tool",
+    "signIn": "Đăng nhập bằng Discord",
+    "signOut": "Đăng xuất",
+    "signedInAs": "Đang đăng nhập: {name}",
+    "noTabs": "Tài khoản này không chung server nào với bot.",
+    "tabs": {
+      "checklist": "Checklist"
+    }
+  },
+  "login": {
+    "title": "Đăng nhập",
+    "intro": "Đăng nhập bằng tài khoản Discord. Trang này dành cho thành viên của server Discord có bot.",
+    "button": "Đăng nhập bằng Discord",
+    "errorCode": "Mã lỗi: {code}",
+    "error": {
+      "stateMismatch": "Liên kết đăng nhập đã hết hạn hoặc đã được dùng. Hãy đăng nhập lại.",
+      "noSharedGuild": "Trang này chỉ dành cho thành viên của server Discord có bot.",
+      "discordUnavailable": "Discord chưa phản hồi. Hãy thử lại sau vài giây.",
+      "discordDenied": "Đăng nhập Discord đã bị huỷ."
+    }
+  },
+  "checklist": {
+    "title": "Checklist",
+    "hello": "Xin chào {name}"
+  },
+  "errors": {
+    "noSession": "Phiên đăng nhập đã hết. Hãy đăng nhập lại.",
+    "noTabAccess": "Tài khoản này không còn chung server nào với bot.",
+    "badOrigin": "Yêu cầu bị từ chối vì không đến từ trang này.",
+    "notFound": "Không tìm thấy.",
+    "apiUnavailable": "Dịch vụ đang không phản hồi. Hãy thử lại sau.",
+    "unknown": "Đã có lỗi. Hãy thử lại."
+  }
+}

@@ -99,6 +99,17 @@ describe("GET /auth/login", () => {
     expect(target.searchParams.get("prompt")).toBe("none");
     expect(cookieValue(res, "__Host-oauth_state")).toBe(`${target.searchParams.get("state")}.s`);
   });
+
+  it("keeps a same-site return path for after the login, and nothing else", async () => {
+    const res = await exports.default.fetch(`${ORIGIN}/auth/login?silent=1&next=%2Fchecklist%3Fx%3D1`, { redirect: "manual" });
+    expect(setCookies(res)).toContain("__Host-oauth_next=%2Fchecklist%3Fx%3D1; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=600");
+
+    for (const next of ["//evil.test/x", "https://evil.test/", "/\\evil.test", "/auth/login?silent=1", "checklist", "javascript:alert(1)"]) {
+      const refused = await exports.default.fetch(`${ORIGIN}/auth/login?next=${encodeURIComponent(next)}`, { redirect: "manual" });
+      expect(refused.status).toBe(302);
+      expect(setCookies(refused)).toContain("__Host-oauth_next=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0");
+    }
+  });
 });
 
 describe("GET /auth/callback", () => {
@@ -138,6 +149,17 @@ describe("GET /auth/callback", () => {
     expect(sent.bearer).toEqual([`Bearer ${ACCESS_TOKEN}`, `Bearer ${ACCESS_TOKEN}`]);
   });
 
+  it("returns to the saved page after a login, re-checking it", async () => {
+    mockDiscord();
+    const res = await callback(`code=the-code&state=${STATE}`, `__Host-oauth_state=${STATE}; __Host-oauth_next=%2Fchecklist%3Fx%3D1`);
+    expect(res.headers.get("location")).toBe("/checklist?x=1");
+    expect(setCookies(res)).toContain("__Host-oauth_next=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0");
+
+    mockDiscord();
+    const tampered = await callback(`code=the-code&state=${STATE}`, `__Host-oauth_state=${STATE}; __Host-oauth_next=%2F%2Fevil.test`);
+    expect(tampered.headers.get("location")).toBe("/");
+  });
+
   it("refuses a user who shares no guild with a bot", async () => {
     mockDiscord({ guilds: ["g-x"] });
     const res = await callback(`code=the-code&state=${STATE}`, `__Host-oauth_state=${STATE}`);
@@ -153,7 +175,6 @@ describe("GET /auth/callback", () => {
       ["vi", "lang=jp", "vi"],
     ];
     for (const [locale, langCookie, expected] of cases) {
-      network.resetHandlers();
       mockDiscord({ locale });
       const cookie = [`__Host-oauth_state=${STATE}`, langCookie].filter(Boolean).join("; ");
       const res = await callback(`code=the-code&state=${STATE}`, cookie);
@@ -164,7 +185,6 @@ describe("GET /auth/callback", () => {
 
   it("sends the user back to /login when Discord fails", async () => {
     for (const mock of [{ tokenStatus: 429 }, { guildsStatus: 500 }]) {
-      network.resetHandlers();
       mockDiscord(mock);
       const res = await callback(`code=the-code&state=${STATE}`, `__Host-oauth_state=${STATE}`);
       expect(res.status).toBe(302);
