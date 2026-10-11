@@ -4,19 +4,17 @@
  * under /auth/*, and forwards /api/<tab>/* to that tab's API Worker over a Service Binding.
  * wrangler.jsonc sends only /auth/* and /api/* here first; other paths are static files.
  */
+import { handleCallback, handleLogin, handleLogout, handleSession } from "./auth";
 import type { Env } from "./env";
 import { forwardApi } from "./forward";
-import { fail } from "./respond";
 
 type Handler = (request: Request, env: Env, nowSec: number) => Promise<Response>;
 
-const notImplemented: Handler = async () => fail(501, "notImplemented");
-
 const ROUTES = new Map<string, Handler>([
-  ["GET /auth/login", notImplemented],
-  ["GET /auth/callback", notImplemented],
-  ["GET /auth/session", notImplemented],
-  ["POST /auth/logout", notImplemented],
+  ["GET /auth/login", handleLogin],
+  ["GET /auth/callback", handleCallback],
+  ["GET /auth/session", handleSession],
+  ["POST /auth/logout", handleLogout],
 ]);
 
 export default {
