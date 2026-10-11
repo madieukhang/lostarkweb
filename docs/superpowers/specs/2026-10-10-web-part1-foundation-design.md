@@ -67,7 +67,7 @@ Worker API **không có địa chỉ công khai** (`workers_dev: false`, không 
 ### Repo web `madieukhang/lostarkweb` (Worker tên `lostark-web`)
 ```
 lostarkweb/
-├─ app/                      Next.js 16.3, App Router, output: 'export'
+├─ app/                      Next.js 16 (16.4.0 lúc lập kế hoạch), App Router, output: 'export'
 │  ├─ page.tsx               trang chủ, chọn tab theo quyền
 │  ├─ checklist/page.tsx     khung tab LoaLogs (nội dung ở phần 2)
 │  ├─ raid/page.tsx          khung tab RaidManage (tạo ở phần 4)
