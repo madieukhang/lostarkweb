@@ -15,3 +15,4 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 - Vietnamese and English UI with a language toggle; the choice lives in the `lang` cookie, and the browser language decides before one is made. Message keys are typed from `en.json`, and a test keeps `vi.json` on the same keys.
 - Plain UI shell (styling comes in the design round): the home page shows who is signed in, the tabs they may open and a logout button; `/login` explains each login error; `/checklist` greets the user through `loalogs-api`.
 - An expired session during a page load re-logs in silently and returns to the same page (`/auth/login?next=`, same-site paths only). A second expiry within a minute goes to `/login` instead, so a session that cannot stick never loops through Discord.
+- README explains running the gateway and `loalogs-api` together locally.
