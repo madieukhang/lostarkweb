@@ -29,6 +29,8 @@ const UPSTREAM_ERRORS = new Set(["DiscordUnavailable", "BotGuildsUnavailable"]);
 /**
  * Accepts only a path on this site outside /auth/*, so the return path can never become an
  * open redirect ("//host", "/\host" and absolute URLs resolve to another origin) or a login loop.
+ * Dot segments can normalize "/.//host" into "//host", which a browser reads as another host,
+ * so the normalized path is checked too.
  */
 function safeNextPath(raw: string | null): string | null {
   if (!raw?.startsWith("/")) return null;
@@ -38,7 +40,7 @@ function safeNextPath(raw: string | null): string | null {
   } catch {
     return null;
   }
-  if (url.origin !== PATH_BASE || url.pathname.startsWith("/auth/")) return null;
+  if (url.origin !== PATH_BASE || url.pathname.startsWith("//") || url.pathname.startsWith("/auth/")) return null;
   return `${url.pathname}${url.search}`;
 }
 

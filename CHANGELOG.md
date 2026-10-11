@@ -16,3 +16,9 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 - Plain UI shell (styling comes in the design round): the home page shows who is signed in, the tabs they may open and a logout button; `/login` explains each login error; `/checklist` greets the user through `loalogs-api`.
 - An expired session during a page load re-logs in silently and returns to the same page (`/auth/login?next=`, same-site paths only). A second expiry within a minute goes to `/login` instead, so a session that cannot stick never loops through Discord.
 - README explains running the gateway and `loalogs-api` together locally.
+
+### Fixed
+- A Discord answer without the expected shape (no user id, a guild list that is not a list) sends the user back to retry instead of crashing the login or issuing a session with no identity.
+- Display names with accents or emoji reach the API as ASCII-escaped JSON instead of relying on a runtime quirk that also logged the whole identity header.
+- The login return path refuses dot-segment forms such as `/.//host` that normalize into another host, and `/login` shows an error code only when it is one of the site's own codes.
+- Vietnamese home page reads "Đã đăng nhập" (signed in) instead of "Đang đăng nhập" (signing in).

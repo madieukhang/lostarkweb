@@ -8,6 +8,7 @@ import { reauthTarget } from "./reauth";
 
 const SILENT_LOGIN_KEY = "lostark.silentLoginAt";
 
+/** Thrown by apiSend on 401, so the UI can keep the user's input and offer a fresh login. */
 export class SessionExpiredError extends Error {
   constructor() {
     super("Session expired");
@@ -15,6 +16,7 @@ export class SessionExpiredError extends Error {
   }
 }
 
+/** A failed API envelope: the HTTP status and the error code the UI translates. */
 export class ApiError extends Error {
   constructor(
     readonly status: number,

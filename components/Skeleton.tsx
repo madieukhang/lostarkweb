@@ -2,7 +2,10 @@
 
 import { useT } from "./LangProvider";
 
-/** Placeholder shown while data loads; the visual design round restyles it. */
+/**
+ * Placeholder shown while data loads; the visual design round restyles it.
+ * @returns A busy status block.
+ */
 export function Skeleton() {
   const tr = useT();
   return (

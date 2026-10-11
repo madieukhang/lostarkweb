@@ -6,9 +6,9 @@ import { signSession, type Tabs } from "../worker/session";
 const ORIGIN = "https://web.test";
 const SECRET = "test-session-secret-0123456789abcdef";
 
-async function sessionCookie(tabs: Tabs = { checklist: ["g-shared"], raid: [] }): Promise<string> {
+async function sessionCookie(tabs: Tabs = { checklist: ["g-shared"], raid: [] }, name = "Traine"): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
-  const value = await signSession({ v: 1, uid: "111", name: "Traine", avatar: null, tabs, iat: now, exp: now + 3600 }, SECRET);
+  const value = await signSession({ v: 1, uid: "111", name, avatar: null, tabs, iat: now, exp: now + 3600 }, SECRET);
   return `__Host-session=${value}`;
 }
 
@@ -24,6 +24,7 @@ type Echo = {
     method: string;
     body: string;
     user: { uid: string; name: string; guilds: string[]; lang: string } | null;
+    rawUser: string | null;
     sawClientHeader: string | null;
     sawCookie: string | null;
   };
@@ -75,6 +76,15 @@ describe("forwarding", () => {
       sawClientHeader: null,
       sawCookie: null,
     });
+  });
+
+  it("keeps the identity header ASCII so any display name survives intact", async () => {
+    for (const name of ["Nguyễn Văn Á", "Traine 🌸", "ひらがな"]) {
+      const res = await api("/api/checklist/whoami", { headers: { Cookie: await sessionCookie(undefined, name) } });
+      const echo = (await res.json()) as Echo;
+      expect(echo.data.user?.name).toBe(name);
+      expect(echo.data.rawUser).toMatch(/^[\x20-\x7e]+$/);
+    }
   });
 
   it("sends a supported language only, defaulting to en", async () => {

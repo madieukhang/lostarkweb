@@ -10,7 +10,7 @@
     "title": "LostArk Tool",
     "signIn": "Đăng nhập bằng Discord",
     "signOut": "Đăng xuất",
-    "signedInAs": "Đang đăng nhập: {name}",
+    "signedInAs": "Đã đăng nhập: {name}",
     "noTabs": "Tài khoản này không chung server nào với bot.",
     "tabs": {
       "checklist": "Checklist"

@@ -1,23 +1,25 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { isMessageKey } from "@/lib/i18n";
+import { loginErrorView } from "@/lib/loginError";
 import { useT } from "./LangProvider";
 
-/** Login page body: the Discord login link and the message for ?error=<code>. */
+/**
+ * Login page body: the Discord login link and the message for ?error=<code>.
+ * @returns The login page content.
+ */
 export function LoginView() {
   const tr = useT();
-  const code = useSearchParams().get("error");
-  const errorKey = code ? `login.error.${code}` : null;
+  const error = loginErrorView(useSearchParams().get("error"));
 
   return (
     <main>
       <h1>{tr("login.title")}</h1>
       <p>{tr("login.intro")}</p>
-      {code && (
+      {error && (
         <div role="alert">
-          <p>{errorKey && isMessageKey(errorKey) ? tr(errorKey) : tr("errors.unknown")}</p>
-          <p>{tr("login.errorCode", { code })}</p>
+          <p>{tr(error.messageKey)}</p>
+          {error.code && <p>{tr("login.errorCode", { code: error.code })}</p>}
         </div>
       )}
       {/* A full navigation: /auth/login is a Worker route, not a page. */}

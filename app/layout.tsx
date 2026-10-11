@@ -7,6 +7,11 @@ export const metadata: Metadata = {
   title: "LostArk Tool",
 };
 
+/**
+ * Site frame: language state and the language toggle above every page.
+ * @param props.children The current page.
+ * @returns The html document.
+ */
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">

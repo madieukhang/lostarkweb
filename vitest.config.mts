@@ -20,6 +20,7 @@ export default {
         method: request.method,
         body: await request.text(),
         user: user === null ? null : JSON.parse(user),
+        rawUser: user,
         sawClientHeader: request.headers.get("x-web-test"),
         sawCookie: request.headers.get("cookie"),
       },

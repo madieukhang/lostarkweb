@@ -18,6 +18,12 @@ type FetcherKey = { [K in keyof Env]: Env[K] extends Fetcher ? K : never }[keyof
 export const TAB_BINDINGS: Readonly<Partial<Record<keyof Tabs, FetcherKey>>> = { checklist: "LOALOGS_API" };
 
 const WRITE_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+
+// Header values must be ASCII; workerd only accepts other characters as a UTF-8 quirk and logs
+// the whole value. \u escapes keep the JSON valid, so the API parses it unchanged.
+function asciiJson(value: unknown): string {
+  return JSON.stringify(value).replace(/[\u007f-￿]/g, (char) => `\\u${char.charCodeAt(0).toString(16).padStart(4, "0")}`);
+}
 const API_PATH = /^\/api\/([^/]+)\/(.*)$/;
 
 /**
@@ -47,7 +53,7 @@ export async function forwardApi(request: Request, env: Env, nowSec: number): Pr
     if (name.startsWith("x-web-") || name === "cookie") forwarded.headers.delete(name);
   }
   const lang = parseLang(readCookie(request, "lang")) ?? "en";
-  forwarded.headers.set("x-web-user", JSON.stringify({ uid: session.uid, name: session.name, guilds, lang }));
+  forwarded.headers.set("x-web-user", asciiJson({ uid: session.uid, name: session.name, guilds, lang }));
 
   try {
     return await env[TAB_BINDINGS[tab]!].fetch(forwarded);

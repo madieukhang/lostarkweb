@@ -12,6 +12,8 @@ const LangContext = createContext<LangContextValue>({ lang: "en", setLang: () =>
 /**
  * Holds the UI language for the whole site. The static HTML renders in en; after hydration the
  * lang cookie or the browser language takes over.
+ * @param props.children The page tree that reads the language.
+ * @returns The context provider wrapping the children.
  */
 export function LangProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>("en");
@@ -33,6 +35,7 @@ export function LangProvider({ children }: { children: ReactNode }) {
   return <LangContext.Provider value={value}>{children}</LangContext.Provider>;
 }
 
+/** @returns The current UI language and the setter that also writes the lang cookie. */
 export function useLang(): LangContextValue {
   return useContext(LangContext);
 }

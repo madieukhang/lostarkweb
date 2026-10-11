@@ -1,5 +1,5 @@
 import { env, exports } from "cloudflare:workers";
-import { http, HttpResponse } from "msw";
+import { http, HttpResponse, type JsonBodyType } from "msw";
 import { describe, expect, it } from "vitest";
 import { handleCallback } from "../worker/auth";
 import { signSession, verifySession, type SessionPayload } from "../worker/session";
@@ -11,10 +11,26 @@ const STATE = "Zm9yLXRlc3Rpbmctb25seS0zMi1ieXRlcy1vZi1zdGF0ZQ";
 const ACCESS_TOKEN = "discord-access-token-123";
 const DISCORD = "https://discord.com/api/v10";
 
-type DiscordMock = { tokenStatus?: number; guildsStatus?: number; guilds?: string[]; locale?: string };
+type DiscordMock = {
+  tokenStatus?: number;
+  guildsStatus?: number;
+  guilds?: string[];
+  locale?: string;
+  /** Replaces the whole 200 body of GET /users/@me. */
+  userBody?: JsonBodyType;
+  /** Replaces the whole 200 body of GET /users/@me/guilds. */
+  guildsBody?: JsonBodyType;
+};
 
 /** Mocks the three Discord calls of a login and records what the Worker sent. */
-function mockDiscord({ tokenStatus = 200, guildsStatus = 200, guilds = ["g-shared", "g-x"], locale = "en-US" }: DiscordMock = {}) {
+function mockDiscord({
+  tokenStatus = 200,
+  guildsStatus = 200,
+  guilds = ["g-shared", "g-x"],
+  locale = "en-US",
+  userBody,
+  guildsBody,
+}: DiscordMock = {}) {
   const sent: { token?: { auth: string | null; form: Record<string, string> }; bearer: (string | null)[] } = { bearer: [] };
   network.use(
     http.post(`${DISCORD}/oauth2/token`, async ({ request }) => {
@@ -33,6 +49,7 @@ function mockDiscord({ tokenStatus = 200, guildsStatus = 200, guilds = ["g-share
     }),
     http.get(`${DISCORD}/users/@me`, ({ request }) => {
       sent.bearer.push(request.headers.get("authorization"));
+      if (userBody !== undefined) return HttpResponse.json(userBody);
       return HttpResponse.json({
         id: "111",
         username: "traine",
@@ -51,6 +68,7 @@ function mockDiscord({ tokenStatus = 200, guildsStatus = 200, guilds = ["g-share
     http.get(`${DISCORD}/users/@me/guilds`, ({ request }) => {
       sent.bearer.push(request.headers.get("authorization"));
       if (guildsStatus !== 200) return new HttpResponse(null, { status: guildsStatus });
+      if (guildsBody !== undefined) return HttpResponse.json(guildsBody);
       return HttpResponse.json(
         guilds.map((id) => ({ id, name: `Guild ${id}`, icon: null, banner: null, owner: false, permissions: "0", features: [] })),
       );
@@ -104,7 +122,19 @@ describe("GET /auth/login", () => {
     const res = await exports.default.fetch(`${ORIGIN}/auth/login?silent=1&next=%2Fchecklist%3Fx%3D1`, { redirect: "manual" });
     expect(setCookies(res)).toContain("__Host-oauth_next=%2Fchecklist%3Fx%3D1; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=600");
 
-    for (const next of ["//evil.test/x", "https://evil.test/", "/\\evil.test", "/auth/login?silent=1", "checklist", "javascript:alert(1)"]) {
+    const unsafe = [
+      "//evil.test/x",
+      "https://evil.test/",
+      "/\\evil.test",
+      "/.//evil.test",
+      "/a/..//evil.test",
+      "/..//evil.test",
+      "/%2e//evil.test",
+      "/auth/login?silent=1",
+      "checklist",
+      "javascript:alert(1)",
+    ];
+    for (const next of unsafe) {
       const refused = await exports.default.fetch(`${ORIGIN}/auth/login?next=${encodeURIComponent(next)}`, { redirect: "manual" });
       expect(refused.status).toBe(302);
       expect(setCookies(refused)).toContain("__Host-oauth_next=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0");
@@ -191,6 +221,23 @@ describe("GET /auth/callback", () => {
       expect(res.headers.get("location")).toBe("/login?error=discordUnavailable");
       expect(cookieValue(res, "__Host-session")).toBeUndefined();
       expect(setCookies(res)).toContain(STATE_CLEARED);
+    }
+  });
+
+  it("treats a malformed Discord answer as Discord being unavailable", async () => {
+    const malformed: DiscordMock[] = [
+      { guildsBody: { message: "x" } },
+      { guildsBody: null },
+      { guildsBody: "str" },
+      { userBody: { username: "no-id", global_name: null, avatar: null } },
+      { userBody: null },
+    ];
+    for (const mock of malformed) {
+      mockDiscord(mock);
+      const res = await callback(`code=the-code&state=${STATE}`, `__Host-oauth_state=${STATE}`);
+      expect(res.status).toBe(302);
+      expect(res.headers.get("location")).toBe("/login?error=discordUnavailable");
+      expect(cookieValue(res, "__Host-session")).toBeUndefined();
     }
   });
 

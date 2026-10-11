@@ -28,7 +28,10 @@ function avatarUrl(session: SessionInfo): string | null {
   return session.avatar ? `https://cdn.discordapp.com/avatars/${session.uid}/${session.avatar}.png?size=64` : null;
 }
 
-/** Home page: who is signed in, the tabs they may open, and logout. */
+/**
+ * Home page: who is signed in, the tabs they may open, and logout.
+ * @returns The home page content for the current session state.
+ */
 export function Shell() {
   const tr = useT();
   const [state, setState] = useState<ShellState>({ status: "loading" });

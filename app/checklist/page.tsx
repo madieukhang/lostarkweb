@@ -10,7 +10,10 @@ type WhoAmI = { uid: string; name: string; guilds: string[]; lang: string };
 
 type PageState = { status: "loading" } | { status: "ready"; me: WhoAmI } | { status: "error"; code: string };
 
-/** Checklist tab frame; the list features arrive in part 2. */
+/**
+ * Checklist tab frame; the list features arrive in part 2.
+ * @returns The tab page with a loading, error or greeting state.
+ */
 export default function ChecklistPage() {
   const tr = useT();
   const [state, setState] = useState<PageState>({ status: "loading" });
