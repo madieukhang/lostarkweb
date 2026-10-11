@@ -1,0 +1,20 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "lostark-web",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./out",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    // Login and API paths reach the Worker first; every other path is a static file.
+    "run_worker_first": ["/auth/*", "/api/*"]
+  },
+  "services": [{ "binding": "LOALOGS_API", "service": "loalogs-api" }],
+  // Public values only. A deploy replaces dashboard vars with these, so they must be real;
+  // DISCORD_CLIENT_SECRET and SESSION_SECRET are secrets set in the dashboard.
+  "vars": {
+    "DISCORD_CLIENT_ID": "",
+    "PUBLIC_ORIGIN": "https://lostark-web.lostark-tool.workers.dev"
+  }
+}
