@@ -56,6 +56,15 @@ Mỗi quyết định ghi: ngày, quyết định, lý do, các phương án b�
 - **Lý do:** Traine ưu tiên LoaLogs. Làm trọn một bên sớm cho ra một sản phẩm dùng được.
 - **Bị loại:** làm song song cả hai tab.
 
+## 2026-10-11: Vòng thiết kế giao diện
+- **Quyết định:** làm sau phần 1 và trước phần 2, dùng bộ skill `ui-ux-pro-max` và mock các phương án đặt cạnh nhau. Trong phần 1, giao diện để trơn, chỉ cần chạy đúng.
+- **Lý do:** dựng xong đường ống trước, rồi mới chọn diện mạo một lần cho mọi tab.
+- **Bị loại:** thiết kế giao diện ngay trong phần 1.
+
+## 2026-10-11: Địa chỉ web
+- **Quyết định:** đổi subdomain `workers.dev` của tài khoản Cloudflare từ `spike-mongo-worker` (do lần deploy spike tự đăng ký) thành `lostark-tool`. Web nằm ở `lostark-web.lostark-tool.workers.dev`. Tên miền riêng để sau.
+- **Lý do:** miễn phí, và đủ rõ ràng.
+
 ## 2026-10-10: `lostark-central`
 - **Quyết định:** không dùng và không lấy gì từ `dreamsofdolls/lostark-central`.
 - **Lý do:** đó là dự án cũ của Khang, và Khang đồng ý bỏ.
