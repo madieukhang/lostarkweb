@@ -36,7 +36,7 @@ function mockDiscord({
     http.post(`${DISCORD}/oauth2/token`, async ({ request }) => {
       sent.token = {
         auth: request.headers.get("authorization"),
-        form: Object.fromEntries(new URLSearchParams(await request.text())),
+        form: Object.fromEntries(await request.formData()) as Record<string, string>,
       };
       if (tokenStatus !== 200) return HttpResponse.json({ message: "rate limited", retry_after: 1 }, { status: tokenStatus });
       return HttpResponse.json({
