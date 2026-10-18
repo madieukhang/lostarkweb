@@ -68,3 +68,8 @@ Mỗi quyết định ghi: ngày, quyết định, lý do, các phương án b�
 ## 2026-10-10: `lostark-central`
 - **Quyết định:** không dùng và không lấy gì từ `dreamsofdolls/lostark-central`.
 - **Lý do:** đó là dự án cũ của Khang, và Khang đồng ý bỏ.
+
+## 2026-10-18: Tạm gác bản web
+- **Quyết định:** dừng bản web sau phần 1. Task 10 (đưa lên Cloudflare thật) không làm, nên chưa có Worker nào của web chạy trên Cloudflare. Khả năng cao sẽ bỏ hẳn. Code phần 1 giữ nguyên trong repo này và trong thư mục `cloud/` của LoaLogs.
+- **Lý do:** Traine quyết định ("Cái web mình đắp chiếu rồi Dusk khả năng cao bỏ luôn").
+- **Ghi thêm:** Worker thử nghiệm `spike-mongo-worker` (từng giữ chuỗi kết nối MongoDB) đã kiểm lại ngày 2026-10-18 và không còn trên tài khoản Cloudflare.
