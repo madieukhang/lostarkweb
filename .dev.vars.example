@@ -1,0 +1,3 @@
+MONGODB_URI=
+MONGODB_DB=la_blacklist
+MONGODB_COLLECTION=blacklist
