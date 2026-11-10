@@ -17,6 +17,7 @@ Mở địa chỉ Wrangler in ra (thường là `http://localhost:8788`). `MONGO
 
 - Build command: `npm run build`
 - Output directory: `dist`
+- Nếu cấu hình deploy command thủ công, dùng `npm run deploy` (không dùng `wrangler deploy`, vì đó là lệnh Workers).
 - Đặt `MONGODB_URI` dưới dạng Secret trên Cloudflare Pages; đặt `MONGODB_DB` và `MONGODB_COLLECTION` trong Functions environment variables.
 - Bật compatibility flag `nodejs_compat` cho Production và Preview.
 - MongoDB Atlas cần cho phép mạng của Pages (thường `0.0.0.0/0`) và user chỉ có quyền đọc collection.
