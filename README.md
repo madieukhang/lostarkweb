@@ -22,4 +22,4 @@ Mở địa chỉ Wrangler in ra (thường là `http://localhost:8788`). `MONGO
 - Bật compatibility flag `nodejs_compat` cho Production và Preview.
 - MongoDB Atlas cần cho phép mạng của Pages (thường `0.0.0.0/0`) và user chỉ có quyền đọc collection.
 
-Tên field dùng để tìm và hiển thị tập trung ở `src/config/schema.js`; đồng bộ file schema tương ứng trong `functions/config/schema.js` khi schema MongoDB thay đổi. Hiện tại API tìm prefix trên `name` và các phần tử của `allCharacters`, dùng database `la_blacklist` và collection `blacklist`.
+Tên field dùng để tìm và hiển thị tập trung ở `src/config/schema.js`; đồng bộ file schema tương ứng trong `functions/config/schema.js` khi schema MongoDB thay đổi. Hiện tại các API `/api/search` và `/api/data` tìm prefix trên `name` và các phần tử của `allCharacters`, dùng database `la_blacklist` và collection `blacklist`.
